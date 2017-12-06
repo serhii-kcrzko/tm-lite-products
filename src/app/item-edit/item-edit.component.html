@@ -1,0 +1,28 @@
+<h2 class="right">Історія редагування</h2>
+
+<table class="ui orange selectable celled table">
+  <thead>
+    <tr>
+      <th>Продукт</th>
+      <th>Дата створення</th>
+      <th>Дата редагування</th>
+      <th>Користувач</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of data">
+      <td>
+        <a [routerLink]="['/edit', item.id]">{{ item.name }}</a>
+      </td>
+      <td>{{ item.createdAt }}</td>
+      <td>{{ item.updatedAt }}</td>
+      <td>serhii.kocherezhko@outlook.com</td>
+      <td class="collapsing">
+        <div class="ui fitted checkbox">
+          <a [routerLink]="['/edit', item.id]"><i class="setting icon"></i></a>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,73 @@
+<div class="ui raised segment">
+  <div *ngIf="product">
+    <h2>{{ product.name }}</h2>
+
+    <div class="ui raised segment">
+      <chart [options]="options"></chart>
+    </div>
+
+    <table class="ui orange selectable celled table">
+      <thead>
+        <th>Показник</th>
+        <th>Значення</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Артикул</td>
+          <td>{{ product.article }}</td>
+        </tr>
+        <tr>
+          <td>Cобівартість</td>
+          <td>{{ product.cost }}</td>
+        </tr>
+        <tr>
+          <td>Націнка</td>
+          <td>{{ product.lift }}</td>
+        </tr>
+        <tr>
+          <td>Вартість</td>
+          <td>{{ product.price }}</td>
+        </tr>
+        <tr>
+          <td>Приорітет</td>
+          <td>{{ product.priority }}</td>
+        </tr>
+        <tr>
+          <td>Складний</td>
+          <td>
+            <i class="checkmark icon" *ngIf="product.ingridients.length > 1"></i>
+            <i class="remove icon" *ngIf="product.ingridients.length <= 1"></i>
+          </td>
+        </tr>
+        <tr>
+          <td>Статус</td>
+          <td>{{ product.status || 0 }}</td>
+        </tr>
+        <tr>
+          <td>Прогнозований попит</td>
+          <td>{{ getVal() }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="ui raised segment">
+  <h3>Складові</h3>
+  <table class="ui blue celled table mini">
+    <thead>
+      <th>Інгридієнт</th>
+      <th>Кількість</th>
+      <th>Вартість</th>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of product.ingridients">
+        <td>
+          <a href="">{{ item.name }}</a>
+        </td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.quantity*getVal() }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,76 @@
+<div class="ui raised segment">
+<h2 class="ui header">Додати продукт</h2>
+<form [formGroup]="myForm" novalidate (ngSubmit)="save(myForm)" class="ui form">
+  <div class="field">
+    <label>Артикул</label>
+    <input type="text" class="form-control" formControlName="article">
+    <div *ngIf="!myForm.controls.article.valid" class="ui message negative">
+        Поле "Артикул" є обов'язковим до заповнення
+    </div>
+  </div>
+
+  <!--title-->
+  <div class="field">
+    <label>Назва</label>
+    <input type="text" class="form-control" formControlName="name">
+    <div *ngIf="!myForm.controls.name.valid" class="ui message negative">
+        Поле "Назва" є обов'язковим до заповнення
+    </div>
+  </div>
+
+  <!--cost-->
+  <div class="field">
+      <label>Націнка</label>
+      <input type="text" class="form-control" formControlName="lift">
+      <div *ngIf="!myForm.controls.lift.valid" class="ui message negative">
+          Поле "Націнка" є обов'язковим до заповнення
+      </div>
+    </div>
+
+    <!--cost-->
+  <div class="field">
+      <label>Приорітет</label>
+      <input type="text" class="form-control" formControlName="priority">
+      <div *ngIf="!myForm.controls.priority.valid" class="ui message negative">
+          Поле "Націнка" є обов'язковим до заповнення
+      </div>
+    </div>
+
+  <!--ingridients-->
+  <div formArrayName="ingridients" class="ui piled green segment">
+    <h5>Складові</h5>
+    <div *ngFor="let address of myForm.controls.ingridients.controls; let i=index" class="ui raised segment">
+      <div class="panel-heading">
+        <span *ngIf="myForm.controls.ingridients.controls.length > 1" (click)="removeIngridient(i)"><i class="trash icon red"></i> </span>
+      </div>
+      <div class="panel-body" [formGroupName]="i">
+
+        <div class="field">
+          <label>Сировина</label>
+          <select name="rawsOptions" id="raws" class="form-control" formControlName="raw">
+              <option  *ngFor="let value of rawsOptions" [value]="value.id+'-'+value.name" [selected]="value.selected == true">{{value.name}}</option>
+          </select>
+
+          <div [hidden]="myForm.controls.ingridients.controls[i].controls.raw.valid" class="ui message negative">
+              Вкажіть сировину
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Кількість</label>
+          <input type="text" class="form-control" formControlName="quantity">
+        </div>
+      </div>
+    </div>
+    <a (click)="addIngridient()" style="cursor: default">
+      Додати складову +
+    </a>
+  </div>
+
+  <div class="margin-20">
+    <button type="submit" class="ui button green" [disabled]="!myForm.valid">Зберегти</button>
+  </div>
+  <div class="clearfix"></div>
+</form>
+</div>
+

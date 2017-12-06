@@ -1,0 +1,23 @@
+<div class="ui raised segment">
+  <h2 class="ui header">Обліковий запис</h2>
+
+  <form class="ui form" *ngIf="!authService.getUser()">
+      <div class="field">
+        <label for="username">Корпоративна пошта:</label>
+        <input type="text" class="form-control" name="username" #username>
+      </div>
+      <div class="field">
+        <label for="password">Пароль:</label>
+        <input type="password" class="form-control" name="password" #password>
+      </div>
+
+      <a (click)="login(username.value, password.value)" class="ui teal button">Увійти</a>
+    </form>
+
+    <div class="ui message" *ngIf="authService.getUser()">
+      <p>Cесія користувача: <b>{{ authService.getUser() }}</b></p>
+      <a href (click)="logout()" class="circular ui icon button red">
+        <i class="sign out icon"></i> Вийти
+      </a>
+    </div>
+</div>

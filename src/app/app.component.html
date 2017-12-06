@@ -1,0 +1,25 @@
+<div class="ui inverted menu">
+  <a class="item">
+    TradeMaster Продукти
+  </a>
+  <a [routerLink]="['/add']" class="item">
+    <i class="plus icon"></i> Додати продукт
+  </a>
+  <a [routerLink]="['/edit']" class="item">
+    <i class="settings icon"></i>Редагувати продукт
+  </a>
+  <a [routerLink]="['/show']" class="item">
+    <i class="money icon"></i>Статистика та перегляд
+  </a>
+
+  <div class="right menu">
+    <a [routerLink]="['/login']" class="item">
+      <i class="users icon large"></i>
+    </a>
+  </div>
+</div>
+
+<div class="ui container">
+    <router-outlet></router-outlet>
+</div>
+
