@@ -34,6 +34,10 @@ export class BackendService {
     return this.http.delete(`${BackendService.BASE_URL}/products/${id}`)
       .map((res: any) => res.json());
   }
+
+  putItem(value: any) {
+    return this.http.post(`${BackendService.BASE_URL}/products`, value);
+  }
 }
 
 export const BACKEND_PROVIDERS: Array<any> = [

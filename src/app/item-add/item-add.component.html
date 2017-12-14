@@ -1,76 +1,95 @@
+<!-- BREADCRUMBS -->
+<span>
+  <div class="ui basic label">
+    <a href="/add">
+      <i class="plus icon"></i>Додати сировину</a>
+  </div>
+</span>
+
 <div class="ui raised segment">
-<h2 class="ui header">Додати продукт</h2>
-<form [formGroup]="myForm" novalidate (ngSubmit)="save(myForm)" class="ui form">
-  <div class="field">
-    <label>Артикул</label>
-    <input type="text" class="form-control" formControlName="article">
-    <div *ngIf="!myForm.controls.article.valid" class="ui message negative">
-        Поле "Артикул" є обов'язковим до заповнення
-    </div>
+  <div class="ui ribbon blue label large">
+    ₴{{ getPrice()}}
   </div>
-
-  <!--title-->
-  <div class="field">
-    <label>Назва</label>
-    <input type="text" class="form-control" formControlName="name">
-    <div *ngIf="!myForm.controls.name.valid" class="ui message negative">
-        Поле "Назва" є обов'язковим до заповнення
-    </div>
-  </div>
-
-  <!--cost-->
-  <div class="field">
-      <label>Націнка</label>
-      <input type="text" class="form-control" formControlName="lift">
-      <div *ngIf="!myForm.controls.lift.valid" class="ui message negative">
-          Поле "Націнка" є обов'язковим до заповнення
+  <h2 class="ui header">Додати продукт</h2>
+  <form [formGroup]="addForm" novalidate (ngSubmit)="save()" class="ui form">
+    <div class="field">
+      <label for="productArticle">Артикул</label>
+      <input type="text" id="productArticle" class="form-control" formControlName="article" placeholder="АБВ00123">
+      <div *ngIf="article.hasError('required') && !article.pristine" class="ui pointing red basic label">
+        Поле "Артикул" є обов'язковим до заповнення!
+      </div>
+      <div *ngIf="article.hasError('minlength') && !article.pristine" class="ui pointing red basic label">
+        Артикул повинен відповідати формату "АБВ00123"!
       </div>
     </div>
 
-    <!--cost-->
-  <div class="field">
-      <label>Приорітет</label>
-      <input type="text" class="form-control" formControlName="priority">
-      <div *ngIf="!myForm.controls.priority.valid" class="ui message negative">
-          Поле "Націнка" є обов'язковим до заповнення
+    <!--title-->
+    <div class="field">
+      <label for="productName">Назва</label>
+      <input type="text" id="productName" class="form-control" formControlName="name">
+      <div *ngIf="name.hasError('required') && !name.pristine" class="ui pointing red basic label">
+        Поле "Назва" є обов'язковим до заповнення!
+      </div>
+      <div *ngIf=" name.hasError('minlength') && !name.pristine" class="ui pointing red basic label">
+        Некоректне значення! Назва мусить містити щонайменше 3 символи.
       </div>
     </div>
 
-  <!--ingridients-->
-  <div formArrayName="ingridients" class="ui piled green segment">
-    <h5>Складові</h5>
-    <div *ngFor="let address of myForm.controls.ingridients.controls; let i=index" class="ui raised segment">
-      <div class="panel-heading">
-        <span *ngIf="myForm.controls.ingridients.controls.length > 1" (click)="removeIngridient(i)"><i class="trash icon red"></i> </span>
+    <!--lift-->
+    <div class="field">
+      <label for="productLift">Націнка</label>
+      <input type="text" id="productLift" class="form-control" formControlName="lift">
+      <div *ngIf="(lift.hasError('required') || lift.hasError('minlength')) && !lift.pristine" class="ui pointing red basic label">
+        Поле "Націнка" є обов'язковим до заповнення!
       </div>
-      <div class="panel-body" [formGroupName]="i">
+    </div>
 
-        <div class="field">
-          <label>Сировина</label>
-          <select name="rawsOptions" id="raws" class="form-control" formControlName="raw">
-              <option  *ngFor="let value of rawsOptions" [value]="value.id+'-'+value.name" [selected]="value.selected == true">{{value.name}}</option>
-          </select>
+    <!--ingridients-->
+    <div formArrayName="ingridients" class="ui piled green segment">
+      <div class="ui ribbon green label">
+        ₴{{ getCost() }}
+      </div>
+      <h5>Складові</h5>
+      <div *ngIf="ingridients.value[0].raw==='' || ingridients.value[0].quantity===''" class="ui teal message">
+        <i class="write icon"></i>
+        Внесіть щонайменше одну сировину
+      </div>
 
-          <div [hidden]="myForm.controls.ingridients.controls[i].controls.raw.valid" class="ui message negative">
-              Вкажіть сировину
+      <div *ngFor="let address of addForm.controls.ingridients.controls; let i=index" class="ui raised segment">
+        <div class="panel-heading">
+          <span *ngIf="addForm.controls.ingridients.controls.length > 1" (click)="removeIngridient(i)">
+            <i class="trash icon red"></i>
+          </span>
+        </div>
+        <div class="panel-body" [formGroupName]="i">
+
+          <div class="field">
+            <label>Сировина</label>
+            <select name="rawsOptions" id="raws" class="form-control" formControlName="raw">
+              <option *ngFor="let value of rawsOptions" [value]="value.id" [selected]="value.selected == true">{{value.name}}</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Кількість</label>
+            <input type="text" class="form-control" formControlName="quantity">
           </div>
         </div>
-
-        <div class="field">
-          <label>Кількість</label>
-          <input type="text" class="form-control" formControlName="quantity">
-        </div>
       </div>
+      <a (click)="addIngridient()" style="cursor: default">
+        Додати складову +
+      </a>
     </div>
-    <a (click)="addIngridient()" style="cursor: default">
-      Додати складову +
-    </a>
-  </div>
-
-  <div class="margin-20">
-    <button type="submit" class="ui button green" [disabled]="!myForm.valid">Зберегти</button>
-  </div>
-  <div class="clearfix"></div>
-</form>
+    <div *ngIf="!saved" class="ui teal message">
+      <i class="write icon"></i>
+      Заповніть усі поля
+    </div>
+    <div *ngIf="saved" class="ui green message">
+      <i class="send icon"></i>
+      Зміни збережено!
+    </div>
+    <button class="ui button green" type="submit" [disabled]="!addForm.valid">Зберегти</button>
+  </form>
 </div>
 
+<pre>{{ addForm.value | json }}</pre>

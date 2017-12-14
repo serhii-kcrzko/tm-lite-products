@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Customer } from './item.interface';
 
 import { Http, Response } from '@angular/http';
@@ -7,6 +7,9 @@ import 'rxjs/add/operator/map';
 
 import _forEach from 'lodash/foreach';
 import _locate from 'lodash/find';
+import _filter from 'lodash/filter';
+import _reduce from 'lodash/reduce';
+import _round from 'lodash/round';
 
 import { BackendService } from '../backend.service';
 
@@ -16,22 +19,31 @@ import { BackendService } from '../backend.service';
   styleUrls: ['./item-add.component.css']
 })
 export class ItemAddComponent implements OnInit {
-  public myForm: FormGroup;
-  public rawsOptions: any;
+  addForm: FormGroup;
+  rawsOptions: any;
+  article: AbstractControl;
+  name: AbstractControl;
+  lift: AbstractControl;
+  ingridients: AbstractControl;
+  currentPrice = 0;
 
-  constructor(private _fb: FormBuilder, private db: BackendService, private http: Http) { }
-
-  ngOnInit() {
-    this.myForm = this._fb.group({
-      article: ['', [Validators.required, Validators.minLength(5)]],
-      name: ['', [Validators.required]],
-      lift: ['', [Validators.required]],
-      priority: ['', [Validators.required]],
+  constructor(private _fb: FormBuilder, private db: BackendService, private http: Http) {
+    this.addForm = this._fb.group({
+      article: ['', [Validators.required, Validators.minLength(8)]],
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      lift: ['1', [Validators.required, Validators.minLength(1)]],
       ingridients: this._fb.array([
         this.initIngridient(),
       ])
     });
 
+    this.article = this.addForm.controls['article'];
+    this.name = this.addForm.controls['name'];
+    this.lift = this.addForm.controls['lift'];
+    this.ingridients = this.addForm.controls['ingridients'];
+  }
+
+  ngOnInit() {
     this.getRaws();
   }
 
@@ -43,20 +55,35 @@ export class ItemAddComponent implements OnInit {
     });
   }
 
+  calculatePrice() {
+    const items = _filter(this.ingridients.value, obj => obj.raw !== '');
+    if (items.length && items[0].raw !== '') {
+      const cost = _reduce(items, (sum, obj) => {
+        const item = this.find('id', obj.raw);
+        return sum + (item.actualPrice || 0 * obj.quantity || 0);
+      }, 0);
+      this.currentPrice = cost * +this.lift.value;
+    }
+  }
+
   addIngridient() {
-    const control = <FormArray>this.myForm.controls['ingridients'];
+    const control = <FormArray>this.ingridients;
     control.push(this.initIngridient());
+    this.calculatePrice();
   }
 
   removeIngridient(i: number) {
-    const control = <FormArray>this.myForm.controls['ingridients'];
+    const control = <FormArray>this.ingridients;
     control.removeAt(i);
+    this.calculatePrice();
   }
 
   save() {
     this.initializeNames();
-    this.http.post('http://localhost:9000/products', this.myForm.value)
-    .subscribe((data) => this.myForm.reset());
+    this.addForm.value.price = this.getPrice();
+    this.addForm.value.cost = this.getCost();
+    this.db.putItem(this.addForm.value)
+      .subscribe((data) => this.addForm.reset());
   }
 
   getData() {
@@ -70,11 +97,27 @@ export class ItemAddComponent implements OnInit {
   }
 
   initializeNames(): void {
-    _forEach(this.myForm.value.ingridients, i => {
-      const id = i.raw.split('-')[0];
-      const name = i.raw.split('-')[1];
-      i.raw = id;
-      i.name = name;
+    _forEach(this.addForm.value.ingridients, i => {
+      const rawOption = this.find('id', i.raw);
+      i.name = rawOption.name;
+      i.price = rawOption.actualPrice;
     });
   }
+
+
+  find(field: string, value: string): any {
+    const json = _locate(this.rawsOptions, obj => obj[field] === value);
+    return json;
+  }
+
+  getPrice() {
+    const price = _round(this.currentPrice, 2);
+    return price.toFixed(2);
+  }
+
+  getCost() {
+    const cost = _round(this.currentPrice / this.lift.value, 2);
+    return cost.toFixed(2);
+  }
 }
+
