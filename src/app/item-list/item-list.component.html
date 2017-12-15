@@ -1,26 +1,43 @@
-<h2 class="right">Сировини</h2>
+<!-- BREADCRUMBS -->
+<span>
+  <div class="ui basic label">
+    <a href="/show">
+      <i class="money icon"></i>Статистика та перегляд</a>
+  </div>
+</span>
 
-<table class="ui red selectable celled table">
+<h2 class="right">Продукти</h2>
+
+<table class="ui red selectable table" *ngIf="data">
   <thead>
     <tr>
       <th>Продукт</th>
       <th>Собівартість</th>
       <th>Націнка</th>
-      <th>Статус</th>
-      <th>Вартість</th>
+      <th class="two wide right aligned">Вартість</th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let item of data" [class.warning]="item.price === item.cost" [class.negative]="item.price/item.cost < 1.01">
+    <tr *ngFor="let item of data" [class.warning]="item.price === item.cost" [class.negative]="item.price/item.cost < 1.45">
       <td>
-          <i class="thumbs down icon" *ngIf="!item.status"></i>
-          <i class="thumbs outline up icon" *ngIf="item.status"></i>
-        <a [routerLink]="['/show', item.id]"><b>{{ item.name }}</b></a>
+        <div class="ui ribbon label" [class.blue]="item.status" [class.white]="!item.status">
+          <i class="star icon"></i>
+        </div>
+        <a [routerLink]="['/show', item.id]">
+          <b>{{ item.name }}</b>
+        </a>
       </td>
-      <td>{{ item.cost }}</td>
-      <td>{{ item.lift }}</td>
-      <td>{{ item.status }}</td>
-      <td>{{ item.price }}</td>
+      <td>₴{{ item.cost }}</td>
+      <td>
+        <div class="ui tag label" [class.red]="item.lift < 1.25" [class.orange]="item.lift >= 1.25 && item.lift < 1.45" [class.green]="item.lift >= 1.45">
+            {{ ((item.lift - 1) * 100).toFixed(2) }}%
+        </div>
+      </td>
+      <td>
+        <div class="ui right ribbon label teal">
+          ₴{{ item.price }}
+        </div>
+      </td>
     </tr>
   </tbody>
 </table>

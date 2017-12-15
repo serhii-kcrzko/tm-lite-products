@@ -10,7 +10,7 @@ import { BackendService } from '../backend.service';
   styleUrls: ['./item-list.component.css']
 })
 export class ItemListComponent implements OnInit {
-  data: any = {};
+  data: any = [];
 
   constructor(private http: Http, private db: BackendService) { }
 
