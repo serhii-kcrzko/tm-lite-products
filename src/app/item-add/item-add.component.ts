@@ -26,6 +26,7 @@ export class ItemAddComponent implements OnInit {
   lift: AbstractControl;
   ingridients: AbstractControl;
   currentPrice = 0;
+  saved = false;
 
   constructor(private _fb: FormBuilder, private db: BackendService, private http: Http) {
     this.addForm = this._fb.group({
@@ -82,8 +83,12 @@ export class ItemAddComponent implements OnInit {
     this.initializeNames();
     this.addForm.value.price = this.getPrice();
     this.addForm.value.cost = this.getCost();
+    this.saved = true;
     this.db.putItem(this.addForm.value)
-      .subscribe((data) => this.addForm.reset());
+      .subscribe((data) => {
+        this.addForm.reset();
+        this.saved = false;
+      });
   }
 
   getData() {
