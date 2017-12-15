@@ -10,6 +10,7 @@ import { BackendService } from '../backend.service';
   styleUrls: ['./item.component.css']
 })
 export class ItemComponent implements OnInit {
+  static RAWS_ADDRESS = process.env.TM_RAWS || 'http://localhost:4013';
   id: string;
   product: Object;
   options: Object;
@@ -45,11 +46,9 @@ export class ItemComponent implements OnInit {
         enabled: false
       }
     };
-
-    console.log(this.options);
   }
 
-  getVal() {
-    return 15;
+  getRawsUrl() {
+    return ItemComponent.RAWS_ADDRESS;
   }
 }

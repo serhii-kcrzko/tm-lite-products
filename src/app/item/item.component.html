@@ -45,14 +45,14 @@
         </tr>
         <tr>
           <td>Прогнозований попит</td>
-          <td>{{ getVal() }}</td>
+          <td>{{ 15 }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<div class="ui raised segment">
+<div class="ui raised segment" *ngIf="product">
   <h3>Складові</h3>
   <table class="ui blue celled table mini">
     <thead>
@@ -63,10 +63,10 @@
     <tbody>
       <tr *ngFor="let item of product.ingridients">
         <td>
-          <a href="">{{ item.name }}</a>
+          <a href="{{ getRawsUrl() }}/show/{{item.raw}}">{{ item.name }}</a>
         </td>
         <td>{{ item.quantity }}</td>
-        <td>{{ item.quantity*getVal() }}</td>
+        <td>{{ item.quantity * 15}}</td>
       </tr>
     </tbody>
   </table>
