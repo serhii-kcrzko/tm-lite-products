@@ -5,7 +5,7 @@ import { Customer } from './item.interface';
 import { Http, Response } from '@angular/http';
 import 'rxjs/add/operator/map';
 
-import _forEach from 'lodash/foreach';
+import _forEach from 'lodash/forEach';
 import _locate from 'lodash/find';
 import _filter from 'lodash/filter';
 import _reduce from 'lodash/reduce';
