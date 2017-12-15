@@ -1,8 +1,12 @@
 <!-- BREADCRUMBS -->
+<!-- BREADCRUMBS-->
 <span>
   <div class="ui basic label">
-    <a href="/add">
-      <i class="plus icon"></i>Додати сировину</a>
+    <a href="/edit">
+      <i class="settings icon"></i> Редагувати продукт</a>
+  </div> >
+  <div class="ui basic label" *ngIf="product">
+    <a href="/edit/{{ id }}"> {{ product.name }}</a>
   </div>
 </span>
 
