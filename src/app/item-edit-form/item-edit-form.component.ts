@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule, A
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { Http } from '@angular/http';
-import _forEach from 'lodash/foreach';
+import _forEach from 'lodash/forEach';
 import _filter from 'lodash/filter';
 import _locate from 'lodash/find';
 import _reduce from 'lodash/reduce';
