@@ -38,6 +38,10 @@ export class BackendService {
   putItem(value: any) {
     return this.http.post(`${BackendService.BASE_URL}/products`, value);
   }
+
+  updateItem(id: string, value: any) {
+    return this.http.put(`${BackendService.BASE_URL}/products/${id}`, value);
+  }
 }
 
 export const BACKEND_PROVIDERS: Array<any> = [

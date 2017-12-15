@@ -1,64 +1,88 @@
-<div class="ui raised segment">
-    <h2 class="ui header">Додати накладну</h2>
-    <form [formGroup]="myForm" novalidate (ngSubmit)="save(myForm)" class="ui form">
-      <div class="field">
-        <label>Артикул</label>
-        <input type="text" class="form-control" formControlName="article" placeholder="{{ product.article }}">
+<!-- BREADCRUMBS -->
+<span>
+  <div class="ui basic label">
+    <a href="/add">
+      <i class="plus icon"></i>Додати сировину</a>
+  </div>
+</span>
+
+<div class="ui raised segment" *ngIf="product">
+  <div class="ui ribbon blue label large" *ngIf="product">
+    ₴{{ product.price }}
+  </div>
+  <h2 class="ui header">{{ product.name }}</h2>
+  <form [formGroup]="editForm" novalidate (ngSubmit)="save()" class="ui form">
+    <div class="field">
+      <label for="productArticle">Артикул</label>
+      <input type="text" placeholder="{{ product.article }}" id="productArticle" class="form-control" formControlName="article" placeholder="АБВ00123">
+      <div *ngIf="article.hasError('required') && !article.pristine" class="ui pointing red basic label">
+        Поле "Артикул" є обов'язковим до заповнення!
       </div>
-
-      <!--title-->
-      <div class="field">
-        <label>Назва</label>
-        <input type="text" class="form-control" formControlName="name" placeholder="{{ product.name }}">
+      <div *ngIf="article.hasError('minlength') && !article.pristine" class="ui pointing red basic label">
+        Артикул повинен відповідати формату "АБВ00123"!
       </div>
-
-      <!--cost-->
-      <div class="field">
-          <label>Націнка</label>
-          <input type="text" class="form-control" formControlName="lift" placeholder="{{ product.lift }}">
-        </div>
-
-        <!--cost-->
-      <div class="field">
-          <label>Приорітет</label>
-          <input type="text" class="form-control" formControlName="priority">
-        </div>
-
-      <!--ingridients-->
-      <div formArrayName="ingridients" class="ui piled green segment">
-        <h5>Складові</h5>
-        <div *ngFor="let item of product.ingridients" class="ui raised segment">
-          <div class="panel-heading">
-            <span *ngIf="myForm.controls.ingridients.controls.length > 1" (click)="removeIngridient(i)"><i class="trash icon red"></i> </span>
-          </div>
-          <div class="panel-body" [formGroupName]="i">
-
-            <div class="field">
-              <label>Сировина</label>
-              <select name="rawsOptions" id="raws" class="form-control" formControlName="raw">
-                  <option  *ngFor="let value of rawsOptions" [value]="value.id+'-'+value.name" [selected]="value.selected == true">{{value.name}}</option>
-              </select>
-              <div class="ui message">Попереднє значення: {{item.name}}</div>
-            </div>
-
-            <div class="field">
-              <label>Кількість</label>
-              <input type="text" class="form-control" formControlName="quantity" placeholder="{{item.quantity}}">
-            </div>
-          </div>
-        </div>
-        <a (click)="addIngridient()" style="cursor: default">
-          Додати складову +
-        </a>
-      </div>
-
-      <div class="margin-20">
-        <button type="submit" class="ui button green" [disabled]="!myForm.valid">Зберегти</button>
-      </div>
-      <div class="clearfix"></div>
-    </form>
     </div>
 
-    <pre>Product: {{ getProd() }}</pre>
-    <pre>{{ product.ingridients }}</pre>
+    <!--title-->
+    <div class="field">
+      <label for="productName">Назва</label>
+      <input type="text" placeholder="{{ product.name }}" id="productName" class="form-control" formControlName="name">
+      <div *ngIf="name.hasError('required') && !name.pristine" class="ui pointing red basic label">
+        Поле "Назва" є обов'язковим до заповнення!
+      </div>
+      <div *ngIf=" name.hasError('minlength') && !name.pristine" class="ui pointing red basic label">
+        Некоректне значення! Назва мусить містити щонайменше 3 символи.
+      </div>
+    </div>
 
+    <!--lift-->
+    <div class="field">
+      <label for="productLift">Націнка</label>
+      <input type="text" placeholder="{{ product.lift }}" id="productLift" class="form-control" formControlName="lift">
+      <div *ngIf="(lift.hasError('required') || lift.hasError('minlength')) && !lift.pristine" class="ui pointing red basic label">
+        Поле "Націнка" є обов'язковим до заповнення!
+      </div>
+    </div>
+
+    <!--ingridients-->
+    <div formArrayName="ingridients" class="ui piled green segment" *ngIf="product">
+      <div class="ui ribbon green label">
+        ₴{{ cost }}
+      </div>
+      <h5>Складові</h5>
+      <div *ngIf="ingridients.value[0].raw==='' || ingridients.value[0].quantity===''" class="ui teal message">
+        <i class="write icon"></i>
+        Внесіть щонайменше одну сировину
+      </div>
+
+      <div *ngFor="let item of editForm.controls.ingridients.controls; let i=index" class="ui raised segment">
+        <div class="panel-body" [formGroupName]="i">
+
+          <div class="field">
+            <label>Сировина</label>
+            <select name="rawsOptions" id="raws" class="form-control" formControlName="raw">
+              <option *ngFor="let value of rawsOptions" [value]="value.id" [selected]="value.selected == true">{{value.name}}</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Кількість</label>
+            <input type="text" class="form-control" formControlName="quantity">
+          </div>
+        </div>
+      </div>
+      <a (click)="addIngridient()" style="cursor: default">
+        Додати складову +
+      </a>
+    </div>
+    <div *ngIf="!saved" class="ui teal message">
+      <i class="write icon"></i>
+      Заповніть усі поля
+    </div>
+    <div *ngIf="saved" class="ui green message">
+      <i class="send icon"></i>
+      Зміни збережено!
+    </div>
+    <button class="ui button green" type="submit" >Зберегти</button>
+  </form>
+</div>

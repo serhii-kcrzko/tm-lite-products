@@ -4,6 +4,11 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { Http } from '@angular/http';
 import _forEach from 'lodash/foreach';
+import _filter from 'lodash/filter';
+import _locate from 'lodash/find';
+import _reduce from 'lodash/reduce';
+import _round from 'lodash/round';
+import _flatten from 'lodash/flatten';
 
 import { BackendService } from '../backend.service';
 
@@ -13,64 +18,87 @@ import { BackendService } from '../backend.service';
   styleUrls: ['./item-edit-form.component.css']
 })
 export class ItemEditFormComponent implements OnInit {
-  public myForm: FormGroup;
+  public editForm: FormGroup;
   public rawsOptions: any;
   public product;
   public id: string;
+  public article: AbstractControl;
+  public name: AbstractControl;
+  public lift: AbstractControl;
+  public liftVal = 1;
+  public ingridients: AbstractControl;
+  public currentPrice = 0;
+  public cost = 0;
+  private saved = false;
 
-  constructor(private _fb: FormBuilder, private db: BackendService, private http: Http, private route: ActivatedRoute) {
+  constructor(
+    private _fb: FormBuilder,
+    private db: BackendService,
+    private http: Http,
+    private route: ActivatedRoute,
+    private location: Location) {
     route.params.subscribe(params => { this.id = params['id']; });
 
+    this.editForm = this._fb.group({
+      article: ['', [Validators.required, Validators.minLength(5)]],
+      name: ['', [Validators.required]],
+      lift: ['', [Validators.required]],
+      ingridients: this._fb.array([])
+    });
+
+    this.article = this.editForm.controls['article'];
+    this.name = this.editForm.controls['name'];
+    this.lift = this.editForm.controls['lift'];
+    this.ingridients = this.editForm.controls['ingridients'];
+  }
+
+  ngOnInit() {
     this.getRaws();
 
     this.db
       .getProduct(this.id)
       .subscribe((res: any) => {
-        this.initProduct(res);
+        this.product = res;
+        this.liftVal = this.product.lift;
+        this.currentPrice = this.product.currentPrice;
+        this.cost = this.product.cost;
 
-        console.log(this.product);
-        console.log(this.product.ingridients);
+        for (const i of this.product.ingridients) {
+          this.addIngridient(i);
+        }
       });
   }
 
-  ngOnInit() {
-    this.myForm = this._fb.group({
-      article: ['', [Validators.required, Validators.minLength(5)]],
-      name: ['', [Validators.required]],
-      lift: ['', [Validators.required]],
-      priority: ['', [Validators.required]],
-      ingridients: this._fb.array([
-        this.initIngridient(),
-      ])
-    });
-  }
-
-  initProduct(value: any) {
-    this.product = value;
-  }
-
-  initIngridient() {
+  initIngridient(item?: any) {
     return this._fb.group({
-      raw: ['', Validators.required],
-      quantity: ['', Validators.required],
-      name: ['']
+      raw: ['' + (item !== null ? item.raw : ''), Validators.required],
+      quantity: ['' + (item !== null ? item.quantity : ''), Validators.required],
+      name: ['' + (item !== null ? item.name : '')],
+      price: ['' + (item !== null ? item.price : '')]
     });
   }
 
-  addIngridient() {
-    const control = <FormArray>this.myForm.controls['ingridients'];
-    control.push(this.initIngridient());
+  addIngridient(value?: any) {
+    const control = <FormArray>this.editForm.controls['ingridients'];
+    control.push(this.initIngridient(value || null));
   }
 
-  removeIngridient(i: number) {
-    const control = <FormArray>this.myForm.controls['ingridients'];
-    control.removeAt(i);
+  removeIngridient() {
+    const list = _filter(this.editForm.value.ingridients, i => i.quantity !== '');
+    this.editForm.value.ingridients = list;
   }
 
   save() {
     this.initializeNames();
-    this.http.post('http://localhost:9000/products', this.myForm.value)
-      .subscribe((data) => this.myForm.reset());
+    this.calculatePrice();
+    this.saved = true;
+    this.editForm.value.price = this.currentPrice.toFixed(2);
+    this.editForm.value.cost = this.cost.toFixed(2);
+    this.db.updateItem(this.id, this.editForm.value)
+      .subscribe((data) => {
+        this.saved = false;
+        this.location.back();
+      });
   }
 
   getData() {
@@ -80,20 +108,32 @@ export class ItemEditFormComponent implements OnInit {
   getRaws() {
     this.getData().subscribe(data => {
       this.rawsOptions = data;
-      console.log(data);
     });
   }
 
   initializeNames(): void {
-    _forEach(this.myForm.value.ingridients, i => {
-      const id = i.raw.split('-')[0];
-      const name = i.raw.split('-')[1];
-      i.raw = id;
-      i.name = name;
-    });
+    this.editForm.value.id = this.id;
+    this.editForm.value.article = this.editForm.value.article !== '' ? this.editForm.value.article : this.product.article;
+    this.editForm.value.name = this.editForm.value.name !== '' ? this.editForm.value.name : this.product.name;
+    this.editForm.value.lift = this.editForm.value.lift !== '' ? this.editForm.value.lift : this.product.lift;
   }
 
-  getProd() {
-    return 15;
+  find(field: string, value: string): any {
+    const json = _locate(this.rawsOptions, obj => obj[field] === value);
+    return json;
+  }
+
+  calculatePrice() {
+    const ingridients = _filter(this.editForm.value.ingridients, obj => obj.raw !== '');
+    const items = _flatten(ingridients);
+
+    if (items.length && items[0].raw !== '') {
+      const cost = _reduce(items, (sum, item) => {
+        const raw = this.find('id', item.raw);
+        return sum + (+raw.actualPrice * +item.quantity);
+      }, 0);
+      this.cost = cost;
+      this.currentPrice = cost * +this.liftVal;
+    }
   }
 }

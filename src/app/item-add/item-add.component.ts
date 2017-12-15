@@ -60,7 +60,7 @@ export class ItemAddComponent implements OnInit {
     if (items.length && items[0].raw !== '') {
       const cost = _reduce(items, (sum, obj) => {
         const item = this.find('id', obj.raw);
-        return sum + (item.actualPrice || 0 * obj.quantity || 0);
+        return sum + (+item.actualPrice * +obj.quantity);
       }, 0);
       this.currentPrice = cost * +this.lift.value;
     }
