@@ -136,4 +136,9 @@ export class ItemEditFormComponent implements OnInit {
       this.currentPrice = cost * +this.liftVal;
     }
   }
+
+  delete(): void {
+    this.db.deleteItem(this.id)
+      .subscribe((data) => this.location.back());
+  }
 }
